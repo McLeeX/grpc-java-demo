@@ -23,7 +23,7 @@ public class MessageServer {
         String classPath = Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
         SslContext sslContext = GrpcSslContexts.forServer(new File(classPath + keyCertChainFilePath), new File(classPath + keyFilePath))
                 .trustManager(new File(classPath + trustCertPath)).clientAuth(ClientAuth.REQUIRE)
-                .sslProvider(SslProvider.OPENSSL_REFCNT).build();
+                .sslProvider(SslProvider.OPENSSL).build();
         server = NettyServerBuilder.forAddress(new InetSocketAddress(host, port)).addService(new MessageServiceImpl())
                 .sslContext(sslContext).build();
     }

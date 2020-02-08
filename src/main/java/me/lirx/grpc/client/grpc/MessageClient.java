@@ -34,7 +34,7 @@ public class MessageClient implements Closeable {
         String classPath = Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
         SslContext sslContext = GrpcSslContexts.forClient().trustManager(new File(classPath + trustCertPath))
                 .keyManager(new File(classPath + keyCertChainFilePath), new File(classPath + keyFilePath))
-                .sslProvider(SslProvider.OPENSSL_REFCNT).build();
+                .sslProvider(SslProvider.OPENSSL).build();
         channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS).sslContext(sslContext).build();
         blockingStub = MessageServiceGrpc.newBlockingStub(channel);
     }
