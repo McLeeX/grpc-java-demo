@@ -34,3 +34,5 @@ SslContext sslContext = GrpcSslContexts.forClient()
                 .sslProvider(SslProvider.OPENSSL).build();
 ```
 这样GRPC将会通过证书认证，加密连接。
+
+[Grpc-java tls认证官方文档](https://github.com/grpc/grpc-java/blob/master/SECURITY.md)
