@@ -1,16 +1,18 @@
+syntax = "proto3";
+
 package me.lirx.proto;
 
 option java_package = "me.lirx.proto";
 option java_multiple_files = true;
 
 message Message {
-    optional string header = 1;
-    optional string content = 2;
+    string header = 1;
+    string content = 2;
 }
 
 message Response {
-    optional int32 errCode = 1;
-    optional string content = 2;
+    int32 errCode = 1;
+    string content = 2;
 }
 
 service MessageService {
