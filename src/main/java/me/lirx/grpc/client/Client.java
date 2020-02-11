@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class Client {
     public static void main(String[] args) {
-        try (MessageClient client = new MessageClient("localhost", 10080)) {
+        try (MessageClient client = new MessageClient("127.0.0.1", 10080)) {
             System.out.println(client.sendMessage("test header", "test content"));
         } catch (IOException | AppException e) {
             e.printStackTrace();
