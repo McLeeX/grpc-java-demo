@@ -28,20 +28,15 @@ public class MessageClient implements Closeable {
     private static final String keyCertChainFilePath = "cert\\client\\client.crt";
     private static final String keyFilePath = "cert\\client\\client.pem";
 
-    public MessageClient(String host, int port, SslContext sslContext) {
-        channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS).sslContext(sslContext).build();
-        blockingStub = MessageServiceGrpc.newBlockingStub(channel);
-    }
-
-    public MessageClient(String host, int port) throws SSLException {
+    public MessageClient(String host, int port, String user, String password) throws SSLException {
         String classPath = Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
         SslContext sslContext = GrpcSslContexts.forClient().trustManager(new File(classPath + trustCertPath))
                 .keyManager(new File(classPath + keyCertChainFilePath), new File(classPath + keyFilePath))
                 .sslProvider(SslProvider.OPENSSL).build();
         channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS).sslContext(sslContext).build();
         Metadata authentication = new Metadata();
-        authentication.put(MetadataHeaders.USER, "root");
-        authentication.put(MetadataHeaders.PASSWORD, "a1q2w3e");
+        authentication.put(MetadataHeaders.USER, user);
+        authentication.put(MetadataHeaders.PASSWORD, password);
         blockingStub = MetadataUtils.attachHeaders(MessageServiceGrpc.newBlockingStub(channel), authentication);
     }
 
