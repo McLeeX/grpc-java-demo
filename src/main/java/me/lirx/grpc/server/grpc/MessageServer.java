@@ -1,11 +1,13 @@
 package me.lirx.grpc.server.grpc;
 
 import io.grpc.Server;
+import io.grpc.ServerInterceptors;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
+import me.lirx.grpc.server.grpc.interceptor.ServerHeaderInterceptor;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -24,8 +26,9 @@ public class MessageServer {
         SslContext sslContext = GrpcSslContexts.forServer(new File(classPath + keyCertChainFilePath), new File(classPath + keyFilePath))
                 .trustManager(new File(classPath + trustCertPath)).clientAuth(ClientAuth.REQUIRE)
                 .sslProvider(SslProvider.OPENSSL).build();
-        server = NettyServerBuilder.forAddress(new InetSocketAddress(host, port)).addService(new MessageServiceImpl())
-                .sslContext(sslContext).build();
+        server = NettyServerBuilder.forAddress(new InetSocketAddress(host, port)).addService(
+                ServerInterceptors.intercept(new MessageServiceImpl(), new ServerHeaderInterceptor())
+        ).sslContext(sslContext).build();
     }
 
     public MessageServer start() throws IOException {

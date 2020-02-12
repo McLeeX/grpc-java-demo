@@ -1,12 +1,15 @@
 package me.lirx.grpc.client.grpc;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
+import io.grpc.stub.MetadataUtils;
 import me.lirx.grpc.common.AppException;
+import me.lirx.grpc.common.MetadataHeaders;
 import me.lirx.proto.Message;
 import me.lirx.proto.MessageServiceGrpc;
 import me.lirx.proto.Response;
@@ -36,7 +39,10 @@ public class MessageClient implements Closeable {
                 .keyManager(new File(classPath + keyCertChainFilePath), new File(classPath + keyFilePath))
                 .sslProvider(SslProvider.OPENSSL).build();
         channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS).sslContext(sslContext).build();
-        blockingStub = MessageServiceGrpc.newBlockingStub(channel);
+        Metadata authentication = new Metadata();
+        authentication.put(MetadataHeaders.USER, "root");
+        authentication.put(MetadataHeaders.PASSWORD, "a1q2w3e");
+        blockingStub = MetadataUtils.attachHeaders(MessageServiceGrpc.newBlockingStub(channel), authentication);
     }
 
     public String sendMessage(String header, String content) throws AppException {
