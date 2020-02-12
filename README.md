@@ -77,4 +77,49 @@ SslContext sslContext = GrpcSslContexts.forClient()
 ```
 这样GRPC将会通过证书认证，加密连接。
 
-[Grpc-java tls认证官方文档](https://github.com/grpc/grpc-java/blob/master/SECURITY.md)
+[Grpc-java tls认证官方文档](https://github.com/grpc/grpc-java/blob/master/SECURITY.md)  
+
+## gRPC 消息头验证
+
+1.server端：  
+使用拦截器获取客户端传递过来的header，对header进行验证。
+- 定义一个拦截器用来验证header：  
+```java
+package me.lirx.grpc.server.grpc.interceptor;
+
+import io.grpc.*;
+import me.lirx.grpc.common.MetadataHeaders;
+
+public class ServerHeaderInterceptor implements ServerInterceptor {
+
+    static final Metadata.Key<String> CUSTOM_HEADER_KEY =
+            Metadata.Key.of("custom_header_key", Metadata.ASCII_STRING_MARSHALLER);
+
+    @Override
+    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+        //获取Headers
+        String value = headers.get(CUSTOM_HEADER_KEY);
+        if (...) {
+            // 验证失败
+            throw new StatusRuntimeException(Status.UNAUTHENTICATED);
+        }
+        // 验证成功
+        return next.startCall(call, headers);
+    }
+}
+```
+- 注册拦截器：
+```
+Server server = NettyServerBuilder.forAddress(new InetSocketAddress(host, port)).addService(new MessageServiceImpl())
+                .intercept(new ServerHeaderInterceptor()) // 注册拦截器
+                .sslContext(sslContext).build();
+```
+2.client端：  
+包装对应的stub,增加要传递的header
+```
+    Metadata.Key<String> CUSTOM_HEADER_KEY =
+            Metadata.Key.of("custom_header_key", Metadata.ASCII_STRING_MARSHALLER);
+    Metadata headers = new Metadata();
+    headers.put(CUSTOM_HEADER_KEY, "value");
+    blockingStub = MetadataUtils.attachHeaders(MessageServiceGrpc.newBlockingStub(channel), headers);
+```

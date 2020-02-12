@@ -5,9 +5,6 @@ import me.lirx.grpc.common.MetadataHeaders;
 
 public class ServerHeaderInterceptor implements ServerInterceptor {
 
-    static final Metadata.Key<String> CUSTOM_HEADER_KEY =
-            Metadata.Key.of("custom_server_header_key", Metadata.ASCII_STRING_MARSHALLER);
-
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
         //获取Headers
